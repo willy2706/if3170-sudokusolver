@@ -1,0 +1,7 @@
+(clear)
+(load "sudoku.clp")
+(load "solve.clp")
+(load "output-frills.clp")
+(load "tc1.clp")
+(reset)
+(run)
