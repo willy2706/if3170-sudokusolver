@@ -13,6 +13,7 @@ package socrates_asjavaapp;
 
 
 import InputOutput.Reader;
+import InputOutput.Writer;
 import java.util.Iterator;
 import jess.JessException;
 import jess.Rete;
@@ -30,14 +31,10 @@ import jess.Rete;
 
 public class Socrates_AsJavaApp{
 public static void main(String[] args) {
-//	Character[][] tmp = new Reader().GetContainer();
-//	for (int i = 1; i < tmp.length; ++i) {
-//		for (int j = 1; j < tmp[i].length; ++j) {
-//			System.out.print(tmp[i][j]);
-//		}
-//		System.out.println();
-//	}
+	Character[][] tmp = new Reader().GetContainer();
     try {
+		new Writer().WriteToFile(tmp);
+		
 		Rete env = new Rete();
 		env.batch("file\\sudoku.clp");
 		env.batch("file\\solve.clp");
@@ -46,7 +43,6 @@ public static void main(String[] args) {
 		env.reset();
 		env.eval("(run)");
 		Iterator it = env.listFacts();
-		//new Reader().GetContainer();
     } catch (JessException e) {
 		e.printStackTrace();
     }

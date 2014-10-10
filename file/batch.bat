@@ -1,4 +1,6 @@
 (clear)
+(unwatch all)
+(watch statistics)
 (load "sudoku.clp")
 (load "solve.clp")
 (load "output-frills.clp")
