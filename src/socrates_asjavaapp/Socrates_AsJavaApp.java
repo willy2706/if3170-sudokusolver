@@ -44,6 +44,10 @@ public static void main(String[] args) {
 		env.reset();
 		env.eval("(run)");
 		Iterator it = env.listFacts();
+		while(it.hasNext()){
+            Object element = it.next();
+            System.out.println(element + " ");
+        }
     } catch (JessException e) {
 		e.printStackTrace();
     }
