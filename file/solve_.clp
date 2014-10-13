@@ -43,12 +43,12 @@
 
    =>
    
-   (assert (technique (name Naked-Single) (rank 6)))
+   (assert (technique (name Naked-Single) (rank 1)))
    (assert (technique (name Hidden-Single) (rank 2)))
    (assert (technique (name Locked-Candidate-Single-Line) (rank 3)))
    (assert (technique (name Locked-Candidate-Multiple-Lines) (rank 4)))
    (assert (technique (name Naked-Pairs) (rank 5)))
-   (assert (technique (name Hidden-Pairs) (rank 1)))
+   (assert (technique (name Hidden-Pairs) (rank 6)))
    (assert (technique (name X-Wing) (rank 7)))
    (assert (technique (name Naked-Triples) (rank 8)))
    (assert (technique (name Hidden-Triples) (rank 9)))
@@ -697,7 +697,7 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Row"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
 
 ;;; *******************
 ;;; hidden-pairs-column
@@ -727,7 +727,7 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Column"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
 
 
 ;;; ******************
@@ -758,38 +758,9 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Group"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
 
-;;; ******************
-;;; hidden-pairs-diagonal
-;;; ******************
-   
-(defrule hidden-pairs-diagonal
 
-   (phase match)
-
-   (rank (value ?p) (process yes))
-
-   (technique (name Hidden-Pairs) (rank ?p))
-   
-   (possible (value ?v1) (row ?r1) (diagonal ?d) (column ?c1))
-   
-   (possible (value ?v2&~?v1) (row ?r1) (diagonal ?d) (column ?c1))
-      
-   (possible (value ?v1) (row ?r2&~?r1) (diagonal ?d) (column ?c2&~c1))
-   
-   (possible (value ?v2) (row ?r2) (diagonal ?d) (column ?c2))
-   
-   (not (possible (value ?v1 | ?v2) (row ~?r2&~?r1) (diagonal ?d) (column ~?c2&~?c1)))
-
-   (possible (value ?v&~?v1&~?v2) (row ?r1 | ?r2) (diagonal ?d) (column ?c2 | ?c1) (id ?id)) ;;; ga perlu dipecah jadi 2 kan?
-
-   (not (impossible (id ?id) (value ?v) (rank ?p)))
-
-   =>
-   
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Diagonal"))))
-   
 ;;; ######
 ;;; X Wing
 ;;; ######

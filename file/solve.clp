@@ -697,7 +697,7 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Row"))))
 
 ;;; *******************
 ;;; hidden-pairs-column
@@ -727,7 +727,7 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Column"))))
 
 
 ;;; ******************
@@ -758,9 +758,38 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Group"))))
 
+;;; ******************
+;;; hidden-pairs-diagonal
+;;; ******************
+   
+(defrule hidden-pairs-diagonal
 
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Hidden-Pairs) (rank ?p))
+   
+   (possible (value ?v1) (row ?r1) (diagonal ?d) (column ?c1))
+   
+   (possible (value ?v2&~?v1) (row ?r1) (diagonal ?d) (column ?c1))
+      
+   (possible (value ?v1) (row ?r2&~?r1) (diagonal ?d) (column ?c2&~c1))
+   
+   (possible (value ?v2) (row ?r2) (diagonal ?d) (column ?c2))
+   
+   (not (possible (value ?v1 | ?v2) (row ~?r2&~?r1) (diagonal ?d) (column ~?c2&~?c1)))
+
+   (possible (value ?v&~?v1&~?v2) (row ?r1 | ?r2) (diagonal ?d) (column ?c2 | ?c1) (id ?id)) ;;; ga perlu dipecah jadi 2 kan?
+
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
+
+   =>
+   
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Diagonal"))))
+   
 ;;; ######
 ;;; X Wing
 ;;; ######

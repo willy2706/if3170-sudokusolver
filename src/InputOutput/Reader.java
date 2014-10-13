@@ -25,14 +25,10 @@ public class Reader {
 			String sCurrentLine;
 			br = new BufferedReader(new FileReader("file\\input.txt"));
 			
-			int i = 0;
 			int line = 0;
 			while ((sCurrentLine = br.readLine()) != null) {
-				++i;
-				if ((i%3) != 0) {
-					++line;
-					tmp[line] = sCurrentLine;
-				}
+				++line;
+				tmp[line] = sCurrentLine;
 				//System.out.println(i);
 			}
 		} catch (IOException e) {
@@ -53,8 +49,7 @@ public class Reader {
 		Character[][] retval = new Character[7][7];
 		for (int i = 1; i <= 6; ++i) {
 			for (int j = 1; j <= 6; ++j) {
-				if (j < 4) retval[i][j] = param[i].charAt(j-1);
-				else retval[i][j] = param[i].charAt(j);
+				retval[i][j] = param[i].charAt(2*(j-1));
 			}
 		}
 		return retval;

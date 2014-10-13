@@ -32,6 +32,7 @@ import jess.Rete;
 public class Socrates_AsJavaApp{
 public static void main(String[] args) {
 	Character[][] tmp = new Reader().GetContainer();
+	//System.out.println();
     try {
 		new Writer().WriteToFile(tmp);
 		
@@ -39,7 +40,7 @@ public static void main(String[] args) {
 		env.batch("file\\sudoku.clp");
 		env.batch("file\\solve.clp");
 		env.batch("file\\output-frills.clp");
-		env.batch("file\\tc1.clp");
+		env.batch("file\\tc.clp");
 		env.reset();
 		env.eval("(run)");
 		Iterator it = env.listFacts();
