@@ -5,28 +5,26 @@
  */
 package sudokuGUI;
 
-import socrates_asjavaapp.Inference;
 import InputOutput.Reader;
 import InputOutput.Writer;
-/**
- *
- * @author WILLY
- */
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import socrates_asjavaapp.Inference;
 
 public class SudokuController {
 
     JLabel leftLabel, rightLabel;
     JFormattedTextField[][] leftSudoku, rightSudoku;
     static JButton goButton, loadButton;
-
+	static String fullPath = null;
+	
     public SudokuController() {
         leftSudoku = new JFormattedTextField[6][6]; // standard sudoku size
         rightSudoku = new JFormattedTextField[6][6];
@@ -110,23 +108,31 @@ public class SudokuController {
                 backGroundThread = new Thread() {
                     @Override
                     public void run() {
-						Character[][] tmp = new Reader().GetContainer();
-						new Writer().WriteToFile(tmp);
 						
-						Integer[][] leftValues = new Integer[6][6];
-						for (int i = 0; i < 6; ++i) {
-							for (int j = 0; j < 6; ++j) {
-								leftValues[i][j] = tmp[i+1][j+1] == '*' ? null : Character.getNumericValue(tmp[i+1][j+1]);
+						JFileChooser chooser = new JFileChooser();
+						chooser.setCurrentDirectory(new java.io.File("."));
+						chooser.setDialogTitle("Browse File");
+						chooser.setAcceptAllFileFilterUsed(false);
+						String fullPathLocation = chooser.getCurrentDirectory().toString();
+
+						if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+							System.out.println("getCurrentDirectory(): " + fullPathLocation);
+							System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
+							SudokuController.fullPath = chooser.getSelectedFile().toString();
+							Character[][] tmp = new Reader(SudokuController.fullPath).GetContainer();
+							new Writer().WriteToFile(tmp);
+
+							Integer[][] leftValues = new Integer[6][6];
+							for (int i = 0; i < 6; ++i) {
+								for (int j = 0; j < 6; ++j) {
+									leftValues[i][j] = tmp[i+1][j+1] == '*' ? null : Character.getNumericValue(tmp[i+1][j+1]);
+								}
 							}
+							listener.loadButtonPressed(leftValues, SudokuController.this);
+							leftLabel.setText("");
+						} else {
+							System.out.println("No Selection ");
 						}
-//						for (int i = 0; i < 6; ++i) {
-//							for (int j = 0; j < 6; ++j) {
-//								System.out.print(leftValues[i][j] == null ? "X" : leftValues[i][j]);
-//							}
-//							System.out.println();
-//						}
-						listener.loadButtonPressed(leftValues, SudokuController.this);
-						leftLabel.setText("");
                     }
                 };
                 backGroundThread.start();
@@ -141,7 +147,7 @@ public class SudokuController {
 
                     @Override
                     public void run() {
-						Character[][] tmp = new Reader().GetContainer();
+						Character[][] tmp = new Reader(SudokuController.fullPath).GetContainer();
 						Integer[][] leftValues = new Integer[6][6];
 						for (int i = 0; i < 6; ++i) {
 							for (int j = 0; j < 6; ++j) {

@@ -11,9 +11,9 @@ package sudokuGUI;
  * @author WILLY
  */
 import java.awt.EventQueue;
-import javax.swing.UIManager;
 
 import java.awt.EventQueue;
+import javax.swing.JFileChooser;
 import javax.swing.UIManager;
 
 public class SudokuRun implements Runnable {
@@ -30,7 +30,22 @@ public class SudokuRun implements Runnable {
     }
 
     public static void main(String args[]) {
-        tryToSetSystemLookAndFeel();
+//        JFileChooser chooser = new JFileChooser();
+//		chooser.setCurrentDirectory(new java.io.File("."));
+//		chooser.setDialogTitle("Browse File");
+//		//chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		String fullPathLocation = chooser.getCurrentDirectory().toString();
+//
+//		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+//		  System.out.println("getCurrentDirectory(): " + fullPathLocation);
+//		  System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
+//		} else {
+//		  System.out.println("No Selection ");
+//		}
+
+		
+		tryToSetSystemLookAndFeel();
         EventQueue.invokeLater(new SudokuRun());
     }
 

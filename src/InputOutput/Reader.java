@@ -15,15 +15,16 @@ import java.io.IOException;
  * @author WILLY
  */
 public class Reader {
-	public Reader() {
-		
+	private String fullpath;
+	public Reader(String fullpath) {
+		this.fullpath = fullpath;
 	}
 	public Character[][] GetContainer() {
 		BufferedReader br = null;
 		String[] tmp = new String[7];
 		try {
 			String sCurrentLine;
-			br = new BufferedReader(new FileReader("file\\input.txt"));
+			br = new BufferedReader(new FileReader(fullpath));
 			
 			int line = 0;
 			while ((sCurrentLine = br.readLine()) != null) {

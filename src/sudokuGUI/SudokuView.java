@@ -61,8 +61,14 @@ public class SudokuView extends JFrame {
     private JPanel createCenterPanel() {
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.add(createLeftPanel(), getWholeCellConstraints());
-		centerPanel.add(createLoadButton(), getPreferredSizeConstraint());
-        centerPanel.add(createCenterButton(), getPreferredSizeConstraint());
+		
+		final GridLayout gridLayout = new GridLayout(2, 1, 1, 1);
+        JPanel panel = new JPanel(gridLayout);
+		panel.add(createLoadButton());
+		panel.add(createCenterButton());
+		centerPanel.add(panel);
+//		centerPanel.add(createLoadButton(), getPreferredSizeConstraint());
+//        centerPanel.add(createCenterButton(), getPreferredSizeConstraint());
         centerPanel.add(createRightPanel(), getWholeCellConstraints());
         return centerPanel;
     }
@@ -73,7 +79,7 @@ public class SudokuView extends JFrame {
     }
 
 	private JButton createLoadButton() {
-        JButton goButton = new JButton("Load");
+        JButton goButton = new JButton("Browse");
         controller.bindLoadButton(goButton);
         return goButton;
     }
