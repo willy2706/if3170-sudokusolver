@@ -2255,14 +2255,35 @@
 
 (defrule Tebak-tebak
    (phase match)
+   (not (phase guessone))
    (technique (name Tebak-tebak) (rank ?p))
    ?g<- (rank (value ?p) (process yes))
-   ?h<- (rank (value 17) (process yes))
+   ?h<- (rank (value 18) (process yes))
  
    (possible (id ?id) (value ?v1))
-   ?i<-(possible (id ?id) (value ?v2&~?v1))
+   (possible (id ?id) (value ?v2&~?v1))
    (not (impossible (id ?id) (value ?v1)))
 =>
-   (retract ?g ?h ?i)
-   (printout t "Remove possible id=" ?id " value="?v2 crlf))
+   (assert (guess (id ?id) (value ?v1)))
+   (retract ?g ?h)
+   (assert (phase guessone)))
    
+(defrule delete-other-possible
+   (phase match)
+   (phase guessone)
+   (guess (id ?id) (value ?v1))
+   (possible (id ?id) (value ?v2&~?v1))
+   (not (impossible (id ?id) (value ?v2) (rank ?p)))
+   (technique (name Tebak-tebak) (rank ?p))
+=>
+   (assert (impossible (id ?id) (value ?v2) (rank ?p) (reason "Tebak-tebak"))))
+
+   
+(defrule done-guessing
+   (phase match)
+   ?f<-(phase guessone)
+   ?g<-(guess (id ?id) (value ?v1))
+   (technique (name Tebak-tebak) (rank ?p))
+   (not (possible (id ?id) (value ~?v1)))
+=>
+   (retract ?f ?g))

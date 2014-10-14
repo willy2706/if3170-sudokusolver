@@ -53,6 +53,10 @@
 (deftemplate unsolved
    (slot row)
    (slot column))
+   
+(deftemplate acak
+   (slot id)
+   (slot value))
       
 ;;; ###########
 ;;; SETUP RULES
@@ -67,7 +71,8 @@
    =>
 
    (assert (phase grid-values))
-
+   (assert (repeat 100))
+   
    (assert (size-value (size 1) (value 1)))
    (assert (size-value (size 2) (value 2)))
    (assert (size-value (size 2) (value 3)))
@@ -214,6 +219,50 @@
    (assert (print-position 1 1)))
    
 ;;; ***********
+;;; Cak-acak
+;;; ***********
+
+(defrule acak
+
+   (declare (salience 21))
+   
+   (phase initial-output)
+   
+   ?f <- (repeat ?p&:(> ?p 0))
+      
+   =>
+   
+   (retract ?f)
+   
+   (assert (repeat (- ?p 1)))
+   
+   (assert (acak (id (+ 1 (mod (random) 36)))   (value (+ 1 (mod (random) 6))) )))
+
+   
+;;; ***********
+;;; random !!!!!
+;;; ***********
+
+(defrule random-mode-on
+
+   (declare (salience 20))
+   
+   (phase initial-output)
+   
+   (repeat 0)
+   
+   ?h <- (acak (id ?id) (value ?v))
+   
+   ?f <- (possible (id ?id) (value ?v) (row ?r) (column ?c) (group ?g) (diagonal ?d))
+      
+   =>
+ 
+   (retract ?f ?h)
+   
+   (assert (possible (id ?id) (value ?v) (row ?r) (column ?c) (group ?g) (diagonal ?d))))
+
+
+;;; ***********
 ;;; begin-match
 ;;; ***********
 
@@ -222,10 +271,12 @@
    (declare (salience -20))
    
    ?f <- (phase initial-output)
+   
+   ?g <- (repeat 0)
       
    =>
    
-   (retract ?f)
+   (retract ?f ?g)
    
    (assert (phase match)))
 
@@ -298,38 +349,55 @@
    =>
       
    (assert (rank (value ?next) (process no))))
-
+   
 ;;; ************
 ;;; begin-output
 ;;; ************
+(defrule begin-count
+   
+   (declare (salience -20))
+   ?f <- (phase match)
+   (not (impossible))
+   (rank (value ?last))
+   (not (rank (value ?p&:(> ?p ?last))))
+   (not (technique (rank ?next&:(> ?next ?last))))
+   (not (count ?c))
+   =>
+   (retract ?f)
+   (assert (phase count))
+   (assert (count 0)))
+   
+(defrule count-possible
+   (declare (salience 20))
+   (phase count)
+   (possible (id ?id) (value ?v))
+   (not (possible (id ?id) (value ~?v)))
 
+   (not (mark ?id))
+   ?f <- (count ?c)
+   =>
+   (assert (mark ?id))
+   (assert (count (+ ?c 1)))
+   (retract ?f))
+   
 (defrule begin-output
 
-   (declare (salience -20))
-   
-   ?f <- (phase match)
-   
-   (not (impossible))
-   
-   (rank (value ?last))
-   
-   (not (rank (value ?p&:(> ?p ?last))))
-
-   (not (technique (rank ?next&:(> ?next ?last))))
-   
+   (declare (salience -20))   
+   ?f <- (phase count)
+   (count 36)
    =>
-   
    (retract ?f)
-   
    (assert (phase final-output))
    (assert (print-position 1 1)))
-
    
-
-  
-    
-   
-   
+(defrule finish-count
+   (declare (salience -22))
+   ?f <- (phase count)
+   (count ?c)
+   =>
+   (retract ?f)
+   (assert (phase match))
+   (reset))
    
    
    
