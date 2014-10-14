@@ -15,6 +15,7 @@
    (slot column)
    (slot group)
    (slot id)
+   (slot diagonal)
    (slot value)
    (slot color))
 
@@ -25,8 +26,13 @@
    (slot row)
    (slot column)
    (slot group)
+   (slot diagonal)
    (slot id)
    (slot value))
+   
+(deftemplate guess
+   (slot value)
+   (slot id))
 
 ;;; ####################
 ;;; INITIALIZATION RULES
@@ -43,24 +49,24 @@
 
    =>
    
-   (assert (technique (name Naked-Single) (rank 1)))
-   (assert (technique (name Hidden-Single) (rank 2)))
-   (assert (technique (name Locked-Candidate-Single-Line) (rank 3)))
-   (assert (technique (name Locked-Candidate-Multiple-Lines) (rank 4)))
-   (assert (technique (name Naked-Pairs) (rank 5)))
-   (assert (technique (name Hidden-Pairs) (rank 6)))
-   (assert (technique (name X-Wing) (rank 7)))
-   (assert (technique (name Naked-Triples) (rank 8)))
-   (assert (technique (name Hidden-Triples) (rank 9)))
-   (assert (technique (name XY-Wing) (rank 10)))
-   (assert (technique (name Swordfish) (rank 11)))
-   (assert (technique (name Duplicate-Color) (rank 12)))
-   (assert (technique (name Color-Conjugate-Pair) (rank 13)))
-   (assert (technique (name Multi-Color-Type-1) (rank 14)))
-   (assert (technique (name Multi-Color-Type-2) (rank 15)))
+   (assert (technique (name Naked-Single) (rank 1)));;;UDA
+   (assert (technique (name Hidden-Single) (rank 2))) ;;;UDA
+   (assert (technique (name Locked-Candidate-Single-Line) (rank 3))) ;;;UDA
+   (assert (technique (name Locked-Candidate-Multiple-Lines) (rank 4))) ;;;UDA
+   (assert (technique (name Naked-Pairs) (rank 5))) ;;;UDA
+   (assert (technique (name Hidden-Pairs) (rank 6))) ;;;UDA
+   (assert (technique (name X-Wing) (rank 7))) ;;;UDA
+   (assert (technique (name Naked-Triples) (rank 8))) ;;;UDA
+   (assert (technique (name Hidden-Triples) (rank 9)));;;UDA
+   (assert (technique (name XY-Wing) (rank 10))) ;;;UDA
+   (assert (technique (name Swordfish) (rank 11))) ;;;UDA
+   (assert (technique (name Duplicate-Color) (rank 12))) ;;;UDA
+   (assert (technique (name Color-Conjugate-Pair) (rank 13))) ;;;UDA
+   (assert (technique (name Multi-Color-Type-1) (rank 14)));;;UDA
+   (assert (technique (name Multi-Color-Type-2) (rank 15)));;;UDA
    (assert (technique (name Forced-Chain-Convergence) (rank 16)))
    (assert (technique (name Forced-Chain-XY) (rank 17)))
-   (assert (technique (name Unique-Rectangle) (rank 18))))
+   (assert (technique (name Tebak-tebak) (rank 18)))) ;;;UDA
    
 ;;; #################
 ;;; ELIMINATION RULES
@@ -300,11 +306,11 @@
 
    (technique (name Naked-Single) (rank ?p))
    
-   (possible (value ?v) (diagonal ?d) (id ?id))
+   (possible (value ?v) (diagonal ?d&:(< ?d 3)) (id ?id))
    
-   (not (possible (value ~?v) (diagonal ?d) (id ?id)))
+   (not (possible (value ~?v) (diagonal ?d&:(< ?d 3)) (id ?id)))
    
-   (possible (value ?v) (diagonal ?d) (id ?id2&~?id))
+   (possible (value ?v) (diagonal ?d&:(< ?d 3)) (id ?id2&~?id))
    
    (not (impossible (id ?id2) (value ?v) (rank ?p)))
    
@@ -400,11 +406,11 @@
 
    (technique (name Hidden-Single) (rank ?p))
    
-   (possible (value ?v) (diagonal ?d) (id ?id))
+   (possible (value ?v) (diagonal ?d&:(< ?d 3)) (id ?id))
    
-   (not (possible (value ?v) (diagonal ?d) (id ~?id)))
+   (not (possible (value ?v) (diagonal ?d&:(< ?d 3)) (id ~?id)))
    
-   (possible (value ?v2&~?v) (diagonal ?d) (id ?id))
+   (possible (value ?v2&~?v) (diagonal ?d&:(< ?d 3)) (id ?id))
    
    (not (impossible (id ?id) (value ?v2) (rank ?p)))
 
@@ -477,11 +483,11 @@
 
    (technique (name Locked-Candidate-Single-Line) (rank ?p))
    
-   (possible (value ?v) (diagonal ?d) (group ?g))
+   (possible (value ?v) (diagonal ?d&:(< ?d 3)) (group ?g))
    
-   (not (possible (value ?v) (diagonal ~?d) (group ?g)))
+   (not (possible (value ?v) (diagonal ~?d&:(< ?d 3)) (group ?g)))
    
-   (possible (value ?v) (diagonal ?d) (group ~?g) (id ?id))
+   (possible (value ?v) (diagonal ?d&:(< ?d 3)) (group ~?g) (id ?id))
    
    (not (impossible (id ?id) (value ?v) (rank ?p)))
 
@@ -553,11 +559,11 @@
 
    (technique (name Locked-Candidate-Multiple-Lines) (rank ?p))
    
-   (possible (value ?v) (diagonal ?d) (group ?g))
+   (possible (value ?v) (diagonal ?d&:(< ?d 3)) (group ?g))
    
-   (not (possible (value ?v) (diagonal ?d) (group ~?g)))
+   (not (possible (value ?v) (diagonal ?d&:(< ?d 3)) (group ~?g)))
    
-   (possible (value ?v) (diagonal ~?d) (group ?g) (id ?id))
+   (possible (value ?v) (diagonal ~?d&:(< ?d 3)) (group ?g) (id ?id))
    
    (not (impossible (id ?id) (value ?v) (rank ?p)))
 
@@ -665,6 +671,38 @@
    
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Pairs"))))
 
+;;; *****************
+;;; naked-pairs-diagonal
+;;; *****************
+
+(defrule naked-pairs-diagonal
+
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Naked-Pairs) (rank ?p))
+
+   (possible (value ?v1) (diagonal ?d&:(< ?d 3)) (id ?id1))
+   
+   (possible (value ?v2&~?v1) (id ?id1))
+   
+   (not (possible (value ~?v2&~?v1) (id ?id1)))
+   
+   (possible (value ?v1) (diagonal ?d&:(< ?d 3)) (id ?id2&~?id1))
+   
+   (possible (value ?v2) (id ?id2))
+   
+   (not (possible (value ~?v2&~?v1) (id ?id2)))
+
+   (possible (value ?v& ?v1 | ?v2) (diagonal ?d&:(< ?d 3)) (id ?id&~?id2&~?id1))
+
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
+
+   =>
+   
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Pairs Diagonal"))))
+   
 ;;; ############
 ;;; Hidden Pairs
 ;;; ############
@@ -697,7 +735,7 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Row"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
 
 ;;; *******************
 ;;; hidden-pairs-column
@@ -727,7 +765,7 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Column"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
 
 
 ;;; ******************
@@ -758,38 +796,38 @@
 
    =>
    
-   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Group"))))
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
 
-;;; ******************
-;;; hidden-pairs-diagonal
-;;; ******************
-   
-(defrule hidden-pairs-diagonal
-
-   (phase match)
-
-   (rank (value ?p) (process yes))
-
-   (technique (name Hidden-Pairs) (rank ?p))
-   
-   (possible (value ?v1) (row ?r1) (diagonal ?d) (column ?c1))
-   
-   (possible (value ?v2&~?v1) (row ?r1) (diagonal ?d) (column ?c1))
-      
-   (possible (value ?v1) (row ?r2&~?r1) (diagonal ?d) (column ?c2&~c1))
-   
-   (possible (value ?v2) (row ?r2) (diagonal ?d) (column ?c2))
-   
-   (not (possible (value ?v1 | ?v2) (row ~?r2&~?r1) (diagonal ?d) (column ~?c2&~?c1)))
-
-   (possible (value ?v&~?v1&~?v2) (row ?r1 | ?r2) (diagonal ?d) (column ?c2 | ?c1) (id ?id)) ;;; ga perlu dipecah jadi 2 kan?
-
-   (not (impossible (id ?id) (value ?v) (rank ?p)))
-
-   =>
-   
+ ;;; ******************
+ ;;; hidden-pairs-diagonal
+ ;;; ******************
+  
+ (defrule hidden-pairs-diagonal
+  
+    (phase match)
+     
+    (rank (value ?p) (process yes))
+     
+    (technique (name Hidden-Pairs) (rank ?p))
+     
+    (possible (value ?v1) (row ?r1) (diagonal ?d&:(< ?d 3)) (column ?c1))
+     
+    (possible (value ?v2&~?v1) (row ?r1) (diagonal ?d&:(< ?d 3)) (column ?c1))
+     
+    (possible (value ?v1) (row ?r2&~?r1) (diagonal ?d&:(< ?d 3)) (column ?c2&~c1))
+     
+    (possible (value ?v2) (row ?r2) (diagonal ?d&:(< ?d 3)) (column ?c2))
+     
+    (not (possible (value ?v1 | ?v2) (row ~?r2&~?r1) (diagonal ?d&:(< ?d 3)) (column ~?c2&~?c1)))
+     
+    (possible (value ?v&~?v1&~?v2) (row ?r1 | ?r2) (diagonal ?d&:(< ?d 3)) (column ?c2 | ?c1) (id ?id)) ;;; ga perlu dipecah jadi 2 kan?
+     
+    (not (impossible (id ?id) (value ?v) (rank ?p)))
+  
+ =>
+  
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs Diagonal"))))
-   
+    
 ;;; ######
 ;;; X Wing
 ;;; ######
@@ -986,6 +1024,40 @@
    
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Triples"))))
 
+;;; *******************
+;;; naked-triples-diagonal
+;;; *******************
+
+(defrule naked-triples-diagonal
+
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Naked-Triples) (rank ?p))
+   
+   (triple ?v1 ?v2 ?v3)
+   
+   (possible (value ?v1) (diagonal ?g&:(< ?g 3)) (id ?id1))
+   
+   (not (possible (value ~?v1&~?v2&~?v3) (id ?id1)))
+   
+   (possible (value ?v2) (diagonal ?g&:(< ?g 3)) (id ?id2&~?id1))
+
+   (not (possible (value ~?v1&~?v2&~?v3) (id ?id2)))
+   
+   (possible (value ?v3) (diagonal ?g&:(< ?g 3)) (id ?id3&~?id2&~?id1))
+   
+   (not (possible (value ~?v1&~?v2&~?v3) (id ?id3)))
+   
+   (possible (value ?v& ?v1 | ?v2 | ?v3) (diagonal ?g&:(< ?g 3)) (id ?id&~?id1&~?id2&~?id3))
+
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
+
+   =>
+   
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Triples"))))
+
 ;;; ##############
 ;;; Hidden Triples
 ;;; ##############
@@ -1080,6 +1152,36 @@
    
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Triples"))))
 
+;;; ********************
+;;; hidden-triples-diagonal
+;;; ********************
+
+(defrule hidden-triples-diagonal
+
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Hidden-Triples) (rank ?p))
+   
+   (triple ?v1 ?v2 ?v3)
+   
+   (possible (value ?v1) (id ?id1) (diagonal ?d&:(< ?d 3)))
+   
+   (possible (value ?v2) (id ?id2&~?id1) (diagonal ?d&:(< ?d 3)))
+   
+   (possible (value ?v3) (id ?id3&~?id2&~?id1) (diagonal ?d&:(< ?d 3)))
+   
+   (not (possible (value ?v1 | ?v2 | ?v3) (id ~?id3&~?id2&~?id1) (diagonal ?d&:(< ?d 3))))
+   
+   (possible (value ?v&~?v1&~?v2&~?v3) (id ?id& ?id1 | ?id2 | ?id3))
+
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
+
+   =>
+   
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Triples Diagonal"))))
+
 ;;; #########
 ;;; Swordfish
 ;;; #########
@@ -1168,32 +1270,32 @@
 
    (technique (name XY-Wing) (rank ?p))
    
-   (possible (value ?x) (row ?r1) (column ?c1) (group ?g1) (id ?id1))
+   (possible (value ?x) (row ?r1) (column ?c1) (group ?g1) (diagonal ?d1&:(< ?d1 3)) (id ?id1))
    
    (possible (value ?y&~?x) (id ?id1))
    
    (not (possible (value ~?y&~?x) (id ?id1)))
    
-   (possible (value ?x) (row ?r2) (column ?c2) (group ?g2) (id ?id2&~?id1))
+   (possible (value ?x) (row ?r2) (column ?c2) (group ?g2) (diagonal ?d2&:(< ?d2 3)) (id ?id2&~?id1))
    
    (possible (value ?z&~?x) (id ?id2))
    
    (not (possible (value ~?z&~?x) (id ?id2)))
                
-   (test (or (= ?r1 ?r2) (= ?c1 ?c2) (= ?g1 ?g2)))
+   (test (or (= ?r1 ?r2) (= ?c1 ?c2) (= ?g1 ?g2) (= ?d1 ?d2)))
 
-   (possible (value ?y) (row ?r3) (column ?c3) (group ?g3) (id ?id3&~?id2&~?id1))
+   (possible (value ?y) (row ?r3) (column ?c3) (group ?g3) (diagonal ?d3&:(< ?d3 3)) (id ?id3&~?id2&~?id1))
    
    (possible (value ?z&~?y) (id ?id3))
    
    (not (possible (value ~?z&~?y) (id ?id3)))
              
-   (test (or (= ?r1 ?r3) (= ?c1 ?c3) (= ?g1 ?g3)))
+   (test (or (= ?r1 ?r3) (= ?c1 ?c3) (= ?g1 ?g3) (= ?d1 ?d3)))
                             
-   (possible (value ?z) (row ?r4) (column ?c4) (group ?g4) (id ?id&~?id3&~?id2&~?id1))
+   (possible (value ?z) (row ?r4) (column ?c4) (group ?g4) (diagonal ?d4&:(< ?d4 3)) (id ?id&~?id3&~?id2&~?id1))
 
-   (test (and (or (= ?r2 ?r4) (= ?c2 ?c4) (= ?g2 ?g4))
-              (or (= ?r3 ?r4) (= ?c3 ?c4) (= ?g3 ?g4))))
+   (test (and (or (= ?r2 ?r4) (= ?c2 ?c4) (= ?g2 ?g4) (= ?d2 ?d4))
+              (or (= ?r3 ?r4) (= ?c3 ?c4) (= ?g3 ?g4) (= ?d3 ?d4))))
 
    (not (impossible (id ?id) (value ?z) (rank ?p)))
 
@@ -1250,9 +1352,9 @@
    (technique (name Duplicate-Color | Color-Conjugate-Pair | Multi-Color-Type-1  | Multi-Color-Type-2) 
               (rank ?p))
 
-   (possible (row ?r) (column ?c1) (group ?g1) (id ?id1) (value ?v))
+   (possible (row ?r) (column ?c1) (group ?g1) (diagonal ?d1) (id ?id1) (value ?v))
 
-   (possible (row ?r) (column ?c2&~?c1) (group ?g2) (id ?id2) (value ?v))
+   (possible (row ?r) (column ?c2&~?c1) (group ?g2) (diagonal ?d2) (id ?id2) (value ?v))
    
    (not (possible (row ?r) (column ?c3&~?c2&~?c1) (value ?v)))
                      
@@ -1275,6 +1377,7 @@
                                  (column ?c1)
                                  (group ?g1)
                                  (id ?id1)
+                                 (diagonal ?d1)
                                  (value ?v)
                                  (color ?color1)))
                   
@@ -1282,6 +1385,7 @@
                                  (column ?c2)
                                  (group ?g2)
                                  (id ?id2)
+                                 (diagonal ?d2)
                                  (value ?v)
                                  (color ?color2))))
 
@@ -1300,9 +1404,9 @@
    (technique (name Duplicate-Color | Color-Conjugate-Pair | Multi-Color-Type-1 | Multi-Color-Type-2) 
               (rank ?p))
 
-   (possible (row ?r1) (column ?c) (group ?g1) (id ?id1) (value ?v))
+   (possible (row ?r1) (column ?c) (group ?g1) (diagonal ?d1) (id ?id1) (value ?v))
 
-   (possible (row ?r2&~?r1) (column ?c) (group ?g2) (id ?id2) (value ?v))
+   (possible (row ?r2&~?r1) (column ?c) (group ?g2) (diagonal ?d2) (id ?id2) (value ?v))
    
    (not (possible (row ?r3&~?r2&~?r1) (column ?c) (value ?v)))
                      
@@ -1324,6 +1428,7 @@
    (assert (position-value-color (row ?r1)
                                  (column ?c)
                                  (group ?g1)
+                                 (diagonal ?d1)
                                  (id ?id1)
                                  (value ?v)
                                  (color ?color1)))
@@ -1331,10 +1436,63 @@
    (assert (position-value-color (row ?r2)
                                  (column ?c)
                                  (group ?g2)
+                                 (diagonal ?d2)
                                  (id ?id2)
                                  (value ?v)
                                  (color ?color2))))
 
+;;; ************
+;;; color-diagonal
+;;; ************
+
+(defrule color-diagonal
+
+   (declare (salience -10))
+   
+   (phase match)
+   
+   (rank (value ?p) (process yes))
+
+   (technique (name Duplicate-Color | Color-Conjugate-Pair | Multi-Color-Type-1 | Multi-Color-Type-2) 
+              (rank ?p))
+
+   (possible (row ?r1) (column ?c1) (diagonal ?d&:(< ?d 3)) (group ?g1) (id ?id1) (value ?v))
+
+   (possible (row ?r2) (column ?c2) (diagonal ?d&:(< ?d 3)) (group ?g2) (id ?id2&~id1) (value ?v))
+   
+   (not (possible (id ?id3&~?id2&~?id1) (diagonal ?d&:(< ?d 3)) (value ?v)))
+                     
+   (color-pair ?color1 ?color2)
+   
+   ;; Don't use a color previously used for this value.
+
+   (not (position-value-color (value ?v)
+                              (color ?color1 | ?color2)))
+   
+   ;; Don't try to color the position if it's already colored. 
+   
+   (not (position-value-color (row ?r1 | ?r2)
+                              (diagonal ?d)
+                              (value ?v)))
+
+   =>
+   
+   (assert (position-value-color (row ?r1)
+                                 (column ?c1)
+                                 (group ?g1)
+                                 (diagonal ?d)
+                                 (id ?id1)
+                                 (value ?v)
+                                 (color ?color1)))
+                  
+   (assert (position-value-color (row ?r2)
+                                 (column ?c2)
+                                 (group ?g2)
+                                 (diagonal ?d)
+                                 (id ?id2)
+                                 (value ?v)
+                                 (color ?color2))))
+                                 
 ;;; *******************
 ;;; propagate-color-row
 ;;; *******************
@@ -1350,7 +1508,7 @@
 
    (position-value-color (row ?r) (column ?c1) (value ?v) (color ?color1))
                                     
-   (possible (row ?r) (column ?c2&~?c1) (group ?g) (id ?id) (value ?v))
+   (possible (row ?r) (column ?c2&~?c1) (group ?g) (diagonal ?d) (id ?id) (value ?v))
       
    (not (position-value-color (row ?r) (column ?c2) (value ?v)))
                               
@@ -1363,6 +1521,7 @@
    (assert (position-value-color (row ?r)
                                  (column ?c2)
                                  (group ?g)
+                                 (diagonal ?d)
                                  (id ?id)
                                  (value ?v)
                                  (color ?color2))))
@@ -1382,7 +1541,7 @@
 
    (position-value-color (row ?r1) (column ?c) (value ?v) (color ?color1))
                                     
-   (possible (row ?r2&~?r1) (column ?c) (group ?g) (id ?id) (value ?v))
+   (possible (row ?r2&~?r1) (column ?c) (group ?g) (diagonal ?d) (id ?id) (value ?v))
       
    (not (position-value-color (row ?r2) (column ?c) (value ?v)))
                               
@@ -1395,6 +1554,7 @@
    (assert (position-value-color (row ?r2)
                                  (column ?c)
                                  (group ?g)
+                                 (diagonal ?d)
                                  (id ?id)
                                  (value ?v)
                                  (color ?color2))))
@@ -1414,7 +1574,7 @@
 
    (position-value-color (column ?c1) (row ?r1) (group ?g) (id ?id1) (value ?v) (color ?color1))
                                     
-   (possible (column ?c2) (row ?r2) (group ?g) (id ?id2&~?id1) (value ?v))
+   (possible (column ?c2) (row ?r2) (group ?g) (diagonal ?d) (id ?id2&~?id1) (value ?v))
       
    (not (position-value-color (column ?c2) (row ?r2) (value ?v)))
 
@@ -1427,10 +1587,44 @@
    (assert (position-value-color (column ?c2)
                                  (row ?r2)
                                  (group ?g)
+                                 (diagonal ?d)
                                  (id ?id2)
                                  (value ?v)
                                  (color ?color2))))
 
+;;; *********************
+;;; propagate-color-diagonal
+;;; *********************
+
+(defrule propagate-color-diagonal
+
+   (phase match)
+   
+   (rank (value ?p) (process yes))
+
+   (technique (name Duplicate-Color | Color-Conjugate-Pair | Multi-Color-Type-1 | Multi-Color-Type-2) 
+              (rank ?p))
+
+   (position-value-color (column ?c1) (row ?r1) (group ?g1) (diagonal ?d&:(< ?d 3)) (id ?id1) (value ?v) (color ?color1))
+                                    
+   (possible (column ?c2) (row ?r2) (group ?g2) (diagonal ?d&:(< ?d 3)) (id ?id2&~?id1) (value ?v))
+      
+   (not (position-value-color (column ?c2) (row ?r2) (value ?v)))
+
+   (not (possible (diagonal ?d&:(< ?d 3)) (id ?id3&~?id2&~?id1) (value ?v)))
+   
+   (color-pair ?color1 ?color2)
+   
+   =>
+
+   (assert (position-value-color (column ?c2)
+                                 (row ?r2)
+                                 (group ?g2)
+                                 (diagonal ?d)
+                                 (id ?id2)
+                                 (value ?v)
+                                 (color ?color2))))
+                                 
 ;;; ###############
 ;;; Duplicate-Color
 ;;; ###############
@@ -1524,6 +1718,34 @@
 
    (assert (impossible (id ?id1) (value ?v) (rank ?p) (reason "Duplicate Color"))))
 
+;;; ************************
+;;; duplicate-color-in-diagonal
+;;; ************************
+
+(defrule duplicate-color-in-diagonal
+
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Duplicate-Color) (rank ?p))
+
+   (position-value-color (diagonal ?d&:(< ?d 3))
+                         (id ?id1)
+                         (value ?v)
+                         (color ?color))
+                                    
+   (position-value-color (diagonal ?d&:(< ?d 3))
+                         (id ?id2&~?id1)
+                         (value ?v)
+                         (color ?color))
+
+   (not (impossible (id ?id1) (value ?v) (rank ?p)))
+
+   =>
+
+   (assert (impossible (id ?id1) (value ?v) (rank ?p) (reason "Duplicate Color"))))
+   
 ;;; ####################
 ;;; Color-Conjugate-Pair
 ;;; ####################
@@ -1581,6 +1803,7 @@
                          (group ?g1)
                          (id ?id1)
                          (value ?v)
+                         (diagonal ?d1&:(< ?d1 3))
                          (color ?color1))
                                     
    (position-value-color (row ?r2)
@@ -1588,6 +1811,7 @@
                          (group ?g2)
                          (id ~?id1)
                          (value ?v)
+                         (diagonal ?d2&:(< ?d2 3))
                          (color ?color2))
                          
    (color-pair ?other-color&~?color1 ~?color1) 
@@ -1596,17 +1820,19 @@
                          (column ?c3)
                          (group ?g3)
                          (value ?v)
+                         (diagonal ?d3&:(< ?d3 3))
                          (color ?other-color))
    
-   (test (or (= ?r1 ?r3) (= ?c1 ?c3) (= ?g1 ?g3)))
+   (test (or (= ?r1 ?r3) (= ?c1 ?c3) (= ?g1 ?g3) (= ?d1 ?d3)))
    
    (position-value-color (row ?r4)
                          (column ?c4)
                          (group ?g4)
                          (value ?v)
+                         (diagonal ?d4&:(< ?d4 3))
                          (color ?other-color))
                          
-   (test (or (= ?r2 ?r4) (= ?c2 ?c4) (= ?g2 ?g4)))
+   (test (or (= ?r2 ?r4) (= ?c2 ?c4) (= ?g2 ?g4)  (= ?d2 ?d4)))
    
    (position-value-color (id ?id)
                          (value ?v)
@@ -1635,6 +1861,7 @@
    (position-value-color (row ?r1)
                          (column ?c1)
                          (group ?g1)
+                         (diagonal ?d1&:(< ?d1 3))
                          (value ?v)
                          (color ?color1))
 
@@ -1643,14 +1870,16 @@
    (position-value-color (row ?r2)
                          (column ?c2)
                          (group ?g2)
+                         (diagonal ?d2&:(< ?d2 3))
                          (value ?v)
                          (color ?other-color1))
    
-   (test (or (= ?r1 ?r2) (= ?c1 ?c2) (= ?g1 ?g2)))
+   (test (or (= ?r1 ?r2) (= ?c1 ?c2) (= ?g1 ?g2) (= ?d1 ?d2)))
    
    (position-value-color (row ?r3)
                          (column ?c3)
                          (group ?g3)
+                         (diagonal ?d3&:(< ?d3 3))
                          (id ?id3)
                          (value ?v)
                          (color ?color2))
@@ -1658,21 +1887,22 @@
    (position-value-color (row ?r4)
                          (column ?c4)
                          (group ?g4)
+                         (diagonal ?d4&:(< ?d4 3))
                          (id ?id4)
                          (value ?v)
                          (color ?other-color2))
 
-   (possible (row ?r5) (column ?c5) (id ?id&~?id3&~?id4) (group ?g5) (value ?v))
+   (possible (row ?r5) (column ?c5) (id ?id&~?id3&~?id4) (group ?g5) (diagonal ?d5&:(< ?d5 3)) (value ?v))
 
-   (test (and (or (= ?r3 ?r5) (= ?c3 ?c5) (= ?g3 ?g5))
-              (or (= ?r4 ?r5) (= ?c4 ?c5) (= ?g4 ?g5))))
+   (test (and (or (= ?r3 ?r5) (= ?c3 ?c5) (= ?g3 ?g5) (= ?d3 ?d5))
+              (or (= ?r4 ?r5) (= ?c4 ?c5) (= ?g4 ?g5) (= ?d4 ?d5))))
    
    (not (impossible (id ?id) (value ?v) (rank ?p)))
 
    =>
    
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Multi Color Type 2"))))
-
+   
 ;;; #############
 ;;; Forced Chains
 ;;; #############
@@ -1691,7 +1921,7 @@
 
    (technique (name Forced-Chain-Convergence | Forced-Chain-XY) (rank ?p))
 
-   (possible (row ?r) (column ?c) (group ?g) (id ?id) (value ?v1))
+   (possible (row ?r) (column ?c) (group ?g) (diagonal ?d) (id ?id) (value ?v1))
    
    (possible (id ?id) (value ?v2&~?v1))
    
@@ -1708,6 +1938,7 @@
                   (row ?r)
                   (column ?c)
                   (group ?g)
+                  (diagonal ?d)
                   (id ?id)
                   (value ?v1))))
 
@@ -1729,7 +1960,7 @@
           
    (possible (row ?r) (column ?c2&~?c1) (value ?v1))
    
-   (possible (row ?r) (column ?c2) (group ?g) (id ?id) (value ?v2&~?v1))
+   (possible (row ?r) (column ?c2) (group ?g) (diagonal ?d) (id ?id) (value ?v2&~?v1))
    
    (not (possible (row ?r) (column ?c2) (value ~?v2&~?v1)))
    
@@ -1744,6 +1975,7 @@
                   (column ?c2)
                   (row ?r)
                   (group ?g)
+                  (diagonal ?d)
                   (id ?id)
                   (value ?v2))))
 
@@ -1765,7 +1997,7 @@
           
    (possible (row ?r2&~?r1) (column ?c) (value ?v1))
    
-   (possible (row ?r2) (column ?c) (group ?g) (id ?id) (value ?v2&~?v1))
+   (possible (row ?r2) (column ?c) (group ?g) (diagonal ?d) (id ?id) (value ?v2&~?v1))
    
    (not (possible (row ?r2) (column ?c) (value ~?v2&~?v1)))
                  
@@ -1780,6 +2012,7 @@
                   (row ?r2)
                   (column ?c)
                   (group ?g)
+                  (diagonal ?d)
                   (id ?id)
                   (value ?v2))))
    
@@ -1799,7 +2032,7 @@
 
    (chain (group ?g) (id ?id1) (value ?v1) (start-row ?sr) (start-column ?sc) (start-value ?sv))
           
-   (possible (row ?r) (column ?c) (group ?g) (id ?id2&~?id1) (value ?v1))
+   (possible (row ?r) (column ?c) (diagonal ?d) (group ?g) (id ?id2&~?id1) (value ?v1))
    
    (possible (id ?id2) (value ?v2&~?v1))
    
@@ -1816,9 +2049,47 @@
                   (row ?r)
                   (column ?c)
                   (group ?g)
+                  (diagonal ?d)
                   (id ?id2)
                   (value ?v2))))
 
+;;; ********************
+;;; continue-chain-diagonal
+;;; ********************
+
+(defrule continue-chain-diagonal
+
+   (declare (salience -10))
+   
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Forced-Chain-Convergence | Forced-Chain-XY) (rank ?p))
+
+   (chain (diagonal ?d) (id ?id1) (value ?v1) (start-row ?sr) (start-column ?sc) (start-value ?sv))
+          
+   (possible (row ?r) (column ?c) (diagonal ?d) (group ?g) (id ?id2&~?id1) (value ?v1))
+   
+   (possible (id ?id2) (value ?v2&~?v1))
+   
+   (not (possible (id ?id2) (value ~?v2&~?v1)))
+                 
+   (not (chain (row ?r) (column ?c) (value ?v2) 
+               (start-row ?sr) (start-column ?sc) (start-value ?sv)))
+
+   =>
+
+   (assert (chain (start-row ?sr)
+                  (start-column ?sc)
+                  (start-value ?sv)
+                  (row ?r)
+                  (column ?c)
+                  (group ?g)
+                  (diagonal ?d)
+                  (id ?id2)
+                  (value ?v2))))
+                  
 ;;; ************************
 ;;; forced-chain-convergence
 ;;; ************************
@@ -1866,22 +2137,23 @@
    (technique (name Forced-Chain-XY) (rank ?p))
 
    (chain (start-row ?r1) (start-column ?c1) (start-value ?v1)
-          (row ?r1) (column ?c1) (value ?v1) (id ?id1) (group ?g1))
+          (row ?r1) (column ?c1) (value ?v1) (id ?id1) (group ?g1) (diagonal ?d1))
           
    (chain (start-row ?r1) (start-column ?c1) (start-value ?v2&~?v1)
           (row ?r1) (column ?c1) (value ?v2))
           
    (chain (start-row ?r1) (start-column ?c1) (start-value ?v2)
-          (row ?r2) (column ?c2) (group ?g2) (id ?id2&~?id1) (value ?v1))
+          (row ?r2) (column ?c2) (group ?g2) (diagonal ?d2) (id ?id2&~?id1) (value ?v1))
        
    (possible (row ?r3)
              (column ?c3)
              (id ?id&~?id2&~?id1)
              (group ?g3)
-             (value ?v1))
+             (value ?v1)
+             (diagonal ?d3))
                    
-   (test (and (or (= ?g1 ?g3) (= ?r1 ?r3) (= ?c1 ?c3))
-              (or (= ?g2 ?g3) (= ?r2 ?r3) (= ?c2 ?c3))))
+   (test (and (or (= ?g1 ?g3) (= ?d1 ?d3) (= ?r1 ?r3) (= ?c1 ?c3))
+              (or (= ?g2 ?g3) (= ?d2 ?d3) (= ?r2 ?r3) (= ?c2 ?c3))))
 
    (not (impossible (id ?id) (value ?v1) (rank ?p)))
 
@@ -1977,3 +2249,20 @@
    
    (assert (impossible (id ?id1) (value ?v1) (rank ?p) (reason "Unique Rectangle"))))
 
+;;;;;;;;;;;;;;;;;;
+;;;Tebak-tebak
+;;;;;;;;;;;;;;;;;;
+
+(defrule Tebak-tebak
+   (phase match)
+   (technique (name Tebak-tebak) (rank ?p))
+   ?g<- (rank (value ?p) (process yes))
+   ?h<- (rank (value 17) (process yes))
+ 
+   (possible (id ?id) (value ?v1))
+   ?i<-(possible (id ?id) (value ?v2&~?v1))
+   (not (impossible (id ?id) (value ?v1)))
+=>
+   (retract ?g ?h ?i)
+   (printout t "Remove possible id=" ?id " value="?v2 crlf))
+   
